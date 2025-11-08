@@ -22,17 +22,22 @@ pipeline {
         '''
       }
     }
+  stage('Deploy Code') {
+         steps {
+           echo 'Deploying application to /var/www/html'
+             script {
+                  def userInput = input(
+                  id: 'DeployConfirm', message: 'Do you want to deploy?', 
+                  parameters: [choice(name: 'Deploy', choices: ['Yes', 'No'], description: 'Confirm deployment')])
+                  if (userInput == 'No') {
+                      error('Deployment aborted by user.')
+                  }else{
+                      sh 'sudo cp * /var/www/html/'
+                  }
+             } 
+         }
+		}
 
-    stage('Deploy') {
-      steps {
-        echo 'Deploying application to /var/www/html'
-        sh '''
-          sudo rsync -av --delete ./ /var/www/html/
-          sudo chown -R www-data:www-data /var/www/html
-          sudo systemctl restart apache2 || true
-        '''
-      }
-    }
   }
 
   post {
